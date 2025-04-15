@@ -1,0 +1,15 @@
+[package]
+name = "rustapp"
+version = "0.1.0"
+edition = "2024"
+description = "Greenhouse controller using Zephyr RTOS and Rust. Combines sensor monitoring, actuator control, and robust IoT communication for precision agriculture applications."
+license = "Apache-2.0"
+
+[lib]
+crate-type = ["staticlib"]
+
+[dependencies]
+zephyr = { path = "../../zephyrproject/modules/lang/rust/zephyr/" }
+log = "0.4.22"
+
+
