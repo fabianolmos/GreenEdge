@@ -1,0 +1,13 @@
+
+#include <dt-bindings/gpio/gpio.h>
+
+/ {
+    compatible = "espressif,esp32c6-devkitm";
+
+    ds18b20 {
+        compatible = "maxim,ds18b20";
+        family-code = <0x28>;
+        gpios = <&gpio0 4 GPIO_ACTIVE_HIGH>; /* Mismo GPIO que en onewire */
+        status = "okay";
+    };
+};
