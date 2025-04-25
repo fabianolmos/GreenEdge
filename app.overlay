@@ -1,13 +1,20 @@
+#include <zephyr/dt-bindings/gpio/gpio.h>
 
-#include <dt-bindings/gpio/gpio.h>
+&uart1 {
+    status = "okay";
+    current-speed = <9600>;
+    pinctrl-0 = <&uart0_default>;
+    pinctrl-names = "default";
 
-/ {
-    compatible = "espressif,esp32c6-devkitm";
-
-    ds18b20 {
-        compatible = "maxim,ds18b20";
-        family-code = <0x28>;
-        gpios = <&gpio0 4 GPIO_ACTIVE_HIGH>; /* Mismo GPIO que en onewire */
+    w1_0: w1-zephyr-serial-0 {
+        compatible = "zephyr,w1-serial";
         status = "okay";
+
+        ds18b20 {
+            compatible = "maxim,ds18b20";
+            family-code = <0x28>;
+            resolution = <12>;
+            status = "okay";
+        };
     };
 };
