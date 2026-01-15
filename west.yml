@@ -5,7 +5,9 @@ manifest:
   projects:
     - name: zephyr
       remote: zephyrproject-rtos
-      revision: v3.4.1
-      import: true
+      revision: v4.3.0
+      path: zephyr
+      import:
+        path-prefix: deps
   self:
-    path: GreenEdge
+    path: .
