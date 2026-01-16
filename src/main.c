@@ -1,66 +1,50 @@
-/*
- * Copyright (c) 2022 Thomas Stranger
- *
- * SPDX-License-Identifier: Apache-2.0
- */
-
 #include <zephyr/kernel.h>
-#include <zephyr/device.h>
-#include <zephyr/devicetree.h>
-#include <zephyr/drivers/sensor.h>
+#include <zephyr/shell/shell.h>
+#include <zephyr/logging/log.h>
 
-/*
- * Get a device structure from a devicetree node with compatible
- * "maxim,ds18b20". (If there are multiple, just pick one.)
- */
-static const struct device *get_ds18b20_device(void)
+LOG_MODULE_REGISTER(app, LOG_LEVEL_INF);
+
+/* =========================
+ * Fake sensor (por ahora)
+ * ========================= */
+static int read_sensor(void)
 {
-	const struct device *const dev = DEVICE_DT_GET_ANY(maxim_ds18b20);
-
-	if (dev == NULL) {
-		/* No such node, or the node does not have status "okay". */
-		printk("\nError: no device found.\n");
-		return NULL;
-	}
-
-	if (!device_is_ready(dev)) {
-		printk("\nError: Device \"%s\" is not ready; "
-		       "check the driver initialization logs for errors.\n",
-		       dev->name);
-		return NULL;
-	}
-
-	printk("Found device \"%s\", getting sensor data\n", dev->name);
-	return dev;
+	/* Simulación */
+	return 42;
 }
 
-int main(void)
+/* =========================
+ * Shell commands
+ * ========================= */
+static int cmd_data(const struct shell *sh, size_t argc, char **argv)
 {
-	const struct device *dev = get_ds18b20_device();
-	int res;
+	ARG_UNUSED(argc);
+	ARG_UNUSED(argv);
 
-	if (dev == NULL) {
-		return 0;
-	}
-
-	while (true) {
-		struct sensor_value temp;
-
-		res = sensor_sample_fetch(dev);
-		if (res != 0) {
-			printk("sample_fetch() failed: %d\n", res);
-			return res;
-		}
-
-		res = sensor_channel_get(dev, SENSOR_CHAN_AMBIENT_TEMP, &temp);
-		if (res != 0) {
-			printk("channel_get() failed: %d\n", res);
-			return res;
-		}
-
-		printk("Temp: %d.%06d\n", temp.val1, temp.val2);
-		k_sleep(K_MSEC(2000));
-	}
+	int value = read_sensor();
+	shell_print(sh, "Sensor value: %d", value);
 
 	return 0;
 }
+
+static int cmd_status(const struct shell *sh, size_t argc, char **argv)
+{
+	ARG_UNUSED(argc);
+	ARG_UNUSED(argv);
+
+	shell_print(sh, "Uptime: %lld ms", k_uptime_get());
+	shell_print(sh, "Free heap: %zu bytes", k_heap_available_get(&z_malloc_heap));
+
+	return 0;
+}
+
+/* Register commands */
+SHELL_CMD_REGISTER(data,   NULL, "Read sensor once", cmd_data);
+SHELL_CMD_REGISTER(status, NULL, "Show system status", cmd_status);
+
+int main(void)
+{
+	LOG_INF("GreenEdge basic shell started");
+	return 0;
+}
+
