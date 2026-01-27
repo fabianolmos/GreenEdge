@@ -33,7 +33,6 @@ static int cmd_status(const struct shell *sh, size_t argc, char **argv)
 	ARG_UNUSED(argv);
 
 	shell_print(sh, "Uptime: %lld ms", k_uptime_get());
-	shell_print(sh, "Free heap: %zu bytes", k_heap_available_get(&z_malloc_heap));
 
 	return 0;
 }
