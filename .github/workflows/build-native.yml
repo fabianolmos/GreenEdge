@@ -21,6 +21,19 @@ jobs:
         with:
           path: GreenEdge
 
+      - name: Free Disk Space
+        run: |
+          echo "Disk space before cleanup:"
+          df -h
+          sudo rm -rf /usr/share/dotnet
+          sudo rm -rf /usr/local/lib/android
+          sudo rm -rf /opt/ghc
+          sudo rm -rf /opt/hostedtoolcache/CodeQL
+          sudo rm -rf /usr/local/share/boost
+          sudo rm -rf "$AGENT_TOOLSDIRECTORY"
+          echo "Disk space after cleanup:"
+          df -h
+
       - name: Cache west modules
         uses: actions/cache@v3
         with:
@@ -29,13 +42,7 @@ jobs:
             GreenEdge/.west
           key: west-${{ hashFiles('GreenEdge/west.yml') }}
           restore-keys: |
-            zephyr-modules-
-
-      # - name: Cache Zephyr SDK
-      #   uses: actions/cache@v3
-      #   with:
-      #     path: ~/zephyr-sdk-0.17.4
-      #     key: zephyr-sdk-0.17.4
+            west-
 
       - name: Install dependencies
         run: |
@@ -56,13 +63,18 @@ jobs:
         run: |
           source ~/zephyr-env/bin/activate
           cd GreenEdge
+          
           if [ -d .west ]; then
-            echo ".west exists, skipping init"
+            echo " .west exists (from cache), skipping init"
           else
+            echo " Initializing west workspace"
             west init -l .
           fi
-
+          
+          echo " Updating west modules"
           west update
+          
+          echo " Exporting Zephyr environment"
           west zephyr-export
 
       - name: Install Zephyr Python dependencies
@@ -71,33 +83,35 @@ jobs:
           cd GreenEdge
           west packages pip --install
 
-      # - name: Setup Zephyr SDK
-      #   run: |
-      #     cd ~
-      #     wget -q https://github.com/zephyrproject-rtos/sdk-ng/releases/download/v0.17.4/zephyr-sdk-0.17.4_linux-x86_64.tar.xz
-      #     tar xf zephyr-sdk-0.17.4_linux-x86_64.tar.xz
-      #     cd zephyr-sdk-0.17.4
-      #     ./setup.sh -t all -h -c
+      - name: Setup Zephyr SDK
+        run: |
+          if [ ! -d ~/zephyr-sdk-0.17.4 ]; then
+            cd ~
+            wget -q https://github.com/zephyrproject-rtos/sdk-ng/releases/download/v0.17.4/zephyr-sdk-0.17.4_linux-x86_64.tar.xz
+            tar xf zephyr-sdk-0.17.4_linux-x86_64.tar.xz
+            cd zephyr-sdk-0.17.4
+            ./setup.sh -t all -h -c
+          fi
 
-      - name: Build for native_posix
+      - name: Build for native_sim
         run: |
           source ~/zephyr-env/bin/activate
-          cd GreenEdge
-          west build -p auto -b native_posix -- -DCONFIG_COVERAGE=y
+          cd GreenEdge/app
+          west build -p auto -b native_sim -- -DCONFIG_COVERAGE=y
 
       - name: Upload build artifacts
         uses: actions/upload-artifact@v4
         with:
-          name: GreenEdge-native-posix
+          name: GreenEdge-native-sim
           path: |
-            GreenEdge/build/zephyr/zephyr.exe
-            GreenEdge/build/zephyr/zephyr.elf
+            GreenEdge/app/build/zephyr/zephyr.exe
+            GreenEdge/app/build/zephyr/zephyr.elf
           retention-days: 30
 
       - name: Save build log
         if: always()
         uses: actions/upload-artifact@v4
         with:
-          name: build-log-native-posix
-          path: GreenEdge/build/build.log
+          name: build-log-native-sim
+          path: GreenEdge/app/build/build.log
           retention-days: 7
