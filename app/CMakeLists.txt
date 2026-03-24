@@ -10,4 +10,6 @@ target_sources(app PRIVATE
 	src/sensor.c
 	src/sensor_thread.c
 	src/shell_cmds.c
+	src/wifi_manager.c
+	src/wifi_shell_cmds.c
 )
