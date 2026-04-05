@@ -13,7 +13,7 @@ LOG_MODULE_REGISTER(sensors, LOG_LEVEL_DBG);
 static struct sensor_data sensors;
 static struct k_mutex sensors_mutex;
 
-void sensors_init(void)
+int sensors_init(void)
 {
     k_mutex_init(&sensors_mutex);
 
@@ -21,13 +21,15 @@ void sensors_init(void)
     k_mutex_lock(&sensors_mutex, K_FOREVER);
     sensors.temperature = 20;
     sensors.humidity = 50;
+    sensors.valid = false;
     k_mutex_unlock(&sensors_mutex);
 
     LOG_INF("Sensors initialized (T=%d, H=%d)", 
             sensors.temperature, sensors.humidity);
+    return 0;
 }
 
-void sensors_read(void)
+int sensors_read(void)
 {
     /* Simulate sensor reading with incremental values */
     sensors.temperature += 1;
@@ -41,11 +43,14 @@ void sensors_read(void)
     if (sensors.humidity > 80) {
         sensors.humidity = 50;
     }
+    sensors.valid = true;
 
     LOG_DBG("Sensor read: T=%d, H=%d", sensors.temperature, sensors.humidity);
+
+    return 0;
 }
 
-void sensors_get(struct sensor_data *data)
+int sensors_get(struct sensor_data *data)
 {
     if (data == NULL) {
         LOG_ERR("NULL pointer passed to sensors_get");
@@ -55,5 +60,6 @@ void sensors_get(struct sensor_data *data)
     k_mutex_lock(&sensors_mutex, K_FOREVER);
     data->temperature = sensors.temperature;
     data->humidity = sensors.humidity;
+    data->valid = sensors.valid;
     k_mutex_unlock(&sensors_mutex);
 }

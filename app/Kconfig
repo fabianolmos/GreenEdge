@@ -1,0 +1,15 @@
+mainmenu "GreenEdge"
+
+source "Kconfig.zephyr"
+
+menu "GreenEdge"
+
+config GREENEDGE_SENSOR_REAL
+    bool "Usar sensor SHT40 real via I2C"
+    depends on I2C && SHT4X
+    default n
+    help
+      Habilita la lectura real del sensor Sensirion SHT40 via I2C.
+      Si está deshabilitado, se usa el backend simulado.
+
+endmenu

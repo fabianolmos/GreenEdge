@@ -16,6 +16,7 @@
 struct sensor_data {
     int temperature;  /**< Temperature in Celsius */
     int humidity;     /**< Humidity in percentage */
+    bool    valid;        /**< true si la última lectura fue exitosa */
 };
 
 /**
@@ -23,7 +24,7 @@ struct sensor_data {
  * 
  * Must be called before any other sensor function
  */
-void sensors_init(void);
+int sensors_init(void);
 
 /**
  * @brief Read current sensor values (simulated)
@@ -33,7 +34,7 @@ void sensors_init(void);
  * 
  * @param data Pointer to sensor data structure to update
  */
-void sensors_read(void);
+int sensors_read(void);
 
 /**
  * @brief Get current sensor values (thread-safe)

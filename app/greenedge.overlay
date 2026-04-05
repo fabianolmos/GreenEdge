@@ -1,0 +1,14 @@
+/*
+ * GreenEdge - Board overlay
+ * SHT40 en I2C0 (GPIO6=SDA, GPIO7=SCL — coincide con el default del board)
+ */
+
+#include <zephyr/dt-bindings/i2c/i2c.h>
+
+&i2c0 {
+    sht40: sht4x@44 {
+        compatible = "sensirion,sht4x";
+        reg = <0x44>;
+        repeatability = <2>;
+    };
+};
